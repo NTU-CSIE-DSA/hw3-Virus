@@ -1,0 +1,8 @@
+@subtask samples
+manual example-01.in
+
+@subtask full
+@include samples
+manual small-1.in
+gen1	20
+gen1	30
