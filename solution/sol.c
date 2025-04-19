@@ -26,6 +26,8 @@ int v_count[MN], v_level[MN], v_damage[MN];
 
 bool debug_mode = 0;
 
+void print_all(int t, int a, int b);
+
 #define COLOR_DEBUG "\033[1;36m"
 #define COLOR_RESET "\033[0m"
 
@@ -48,7 +50,7 @@ typedef struct {
 
 typedef struct {
     int size;
-    Modify m[15];
+    Modify m[10];
 } History;
 
 int top = 0;
@@ -95,11 +97,8 @@ int get_damage(int k) {
 
 // operation 1
 void connect(int c1, int c2) {
-    c1 = id[c1];
-    c2 = id[c2];
-
-    int rc1 = find_root(c_parent, c1);
-    int rc2 = find_root(c_parent, c2);
+    int rc1 = find_root(c_parent, id[c1]);
+    int rc2 = find_root(c_parent, id[c2]);
     if (rc1 == rc2) return;
 
     int size1 = c_size[rc1] - c_delete[rc1];
@@ -174,7 +173,7 @@ void reinstall(int k, int s) {
 
     int rvk = find_root(v_parent, c_virus[rck]);
     int rvs = find_root(v_parent, s);
-    if (rvk != rck) {
+    if (rvk != rvs) {
         modify(&v_count[rvk], v_count[rvk] - 1);
         modify(&v_count[rvs], v_count[rvs] + 1);
     }
@@ -202,9 +201,17 @@ void fusion(int v1, int v2) {
 
 // operation 6
 void status(int k) {
+    int damage = get_damage(k);
     int rck = find_root(c_parent, id[k]);
     int rvk = find_root(v_parent, c_virus[rck]);
-    printf("%lld %lld %lld\n", get_damage(k), v_level[rvk], v_count[rvk]);
+    printf("%lld %lld %lld\n", damage, v_level[rvk], v_count[rvk]);
+
+    if (damage < 0 || v_count[rvk] < 0) {
+        debug_mode = 1;
+        print_all(6, k, 0);
+        printf("\n\nERROR\n\n");
+        exit(1);
+    }
 }
 
 // operation 7
@@ -222,8 +229,8 @@ void revert() {
 
 void init() {
     node_count = n;
+
     for (int i = 1; i <= n + q; i++) {
-        id[i] = i;
         c_size[i] = 1;
         c_parent[i] = i;
         c_delete[i] = 0;
@@ -235,6 +242,7 @@ void init() {
     }
 
     for (int i = 1; i <= n; i++) {
+        id[i] = i;
         c_virus[i] = i;
         c_damage[i] = 0;
         v_count[i] = 1;
@@ -245,6 +253,42 @@ void init() {
     for (int i = 0; i < q; i++) {
         history[i].size = 0;
     }
+}
+
+signed main() {
+    assert(scanf("%lld %lld", &n, &q) == 2);
+
+    init();
+
+    for (int i = 1; i <= q; i++) {
+        int t, a, b;
+        assert(scanf("%lld", &t) == 1);
+        if (t == 1) {
+            assert(scanf("%lld %lld", &a, &b) == 2);
+            connect(a, b);
+        } else if (t == 2) {
+            assert(scanf("%lld", &a) == 1);
+            evolve(a);
+        } else if (t == 3) {
+            assert(scanf("%lld", &a) == 1);
+            attack(a);
+        } else if (t == 4) {
+            assert(scanf("%lld %lld", &a, &b) == 2);
+            reinstall(a, b);
+        } else if (t == 5) {
+            assert(scanf("%lld %lld", &a, &b) == 2);
+            fusion(a, b);
+        } else if (t == 6) {
+            assert(scanf("%lld", &a) == 1);
+            status(a);
+        } else if (t == 7) {
+            revert();
+        }
+        if (t != 6) print_all(t, a, b);
+        if (t <= 5) top++;
+    }
+
+    return 0;
 }
 
 void print_all(int t, int a, int b) {
@@ -348,43 +392,7 @@ void print_all(int t, int a, int b) {
     printf("\n=== DEBUG END ===\n\n");
 
     if (bug) {
-        printf("\n\nerror\n\n");
+        printf("\n\nERROR\n\n");
         exit(1);
     }
-}
-
-signed main() {
-    assert(scanf("%lld %lld", &n, &q) == 2);
-
-    init();
-
-    for (int i = 1; i <= q; i++) {
-        int t, a, b;
-        assert(scanf("%lld", &t) == 1);
-        if (t == 1) {
-            assert(scanf("%lld %lld", &a, &b) == 2);
-            connect(a, b);
-        } else if (t == 2) {
-            assert(scanf("%lld", &a) == 1);
-            evolve(a);
-        } else if (t == 3) {
-            assert(scanf("%lld", &a) == 1);
-            attack(a);
-        } else if (t == 4) {
-            assert(scanf("%lld %lld", &a, &b) == 2);
-            reinstall(a, b);
-        } else if (t == 5) {
-            assert(scanf("%lld %lld", &a, &b) == 2);
-            fusion(a, b);
-        } else if (t == 6) {
-            assert(scanf("%lld", &a) == 1);
-            status(a);
-        } else if (t == 7) {
-            revert();
-        }
-        if (t != 6) print_all(t, a, b);
-        if (t <= 5) top++;
-    }
-
-    return 0;
 }
