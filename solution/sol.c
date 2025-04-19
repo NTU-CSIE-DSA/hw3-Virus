@@ -23,7 +23,7 @@ int v_size[MN], v_parent[MN];
 int c_virus[MN + MQ], c_damage[MN + MQ];
 int v_count[MN], v_level[MN], v_damage[MN];
 
-bool debug_mode = 1;
+bool debug_mode = 0;
 
 // === History ===
 
@@ -108,14 +108,10 @@ void connect(int c1, int c2) {
     int damage1 = get_damage_virus(c_virus[rc1]);
     int damage2 = get_damage_virus(c_virus[rc2]);
 
-    if (debug_mode) printf("rc1, rc2, rv1, rv2: %lld %lld %lld %lld\n", rc1, rc2, rv1, rv2);
-
     if (rv1 == rv2) {
         if (is_c1) {
-            if (debug_mode) printf("is c1\n");
             modify(&c_damage[rc2], c_damage[rc2] + damage2 - damage1 - c_damage[rc1]);
         } else {
-            if (debug_mode) printf("is c2\n");
             modify(&c_damage[rc1], c_damage[rc1] + damage1 - damage2 - c_damage[rc2]);
         }
         return;
@@ -124,32 +120,26 @@ void connect(int c1, int c2) {
     bool is_v1 = true;
     if (v_level[rv1] < v_level[rv2]) is_v1 = false;
 
-    printf("damage1, damage2: %lld %lld\n", damage1, damage2);
-
     if (is_c1 && is_v1) {
         modify(&c_damage[rc2], c_damage[rc2] + damage2 - damage1 - c_damage[rc1]);
         modify(&v_count[rv1], v_count[rv1] + size2);
         modify(&v_count[rv2], v_count[rv2] - size2);
-        if (debug_mode) printf("c1 v1\n");
     } else if (is_c1 && !is_v1) {
         modify(&c_virus[rc1], rv2);
         modify(&c_damage[rc1], c_damage[rc1] + damage1 - v_damage[rv2]);
         modify(&c_damage[rc2], c_damage[rc2] - c_damage[rc1] + damage2 - v_damage[rv2]);
         modify(&v_count[rv2], v_count[rv2] + size1);
         modify(&v_count[rv1], v_count[rv1] - size1);
-        if (debug_mode) printf("c1 v2\n");
     } else if (!is_c1 && is_v1) {
         modify(&c_virus[rc2], rv1);
         modify(&c_damage[rc2], c_damage[rc2] + damage2 - v_damage[rv1]);
         modify(&c_damage[rc1], c_damage[rc1] - c_damage[rc2] + damage1 - v_damage[rv1]);
         modify(&v_count[rv1], v_count[rv1] + size2);
         modify(&v_count[rv2], v_count[rv2] - size2);
-        if (debug_mode) printf("c2 v1\n");
     } else {
         modify(&c_damage[rc1], c_damage[rc1] + damage1 - damage2 - c_damage[rc2]);
         modify(&v_count[rv2], v_count[rv2] + size1);
         modify(&v_count[rv1], v_count[rv1] - size1);
-        if (debug_mode) printf("c2 v2\n");
     }
 }
 
@@ -167,8 +157,6 @@ void reinstall(int k, int s) {
     modify(&v_count[rvk], v_count[rvk] - 1);
     int rvs = find_root(v_parent, s);
     modify(&v_count[rvs], v_count[rvs] + 1);
-
-    printf("rck, rvk, rvs = %lld, %lld, %lld\n", rck, rvk, rvs);
 
     k = id[k];
     modify(&c_size[k], 1);
