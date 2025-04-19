@@ -1,4 +1,5 @@
 #include <assert.h>
+#include <stdarg.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -24,6 +25,19 @@ int c_virus[MN + MQ], c_damage[MN + MQ];
 int v_count[MN], v_level[MN], v_damage[MN];
 
 bool debug_mode = 0;
+
+#define COLOR_DEBUG "\033[1;36m"
+#define COLOR_RESET "\033[0m"
+
+void debug(const char *format, ...) {
+    if (!debug_mode) return;
+    va_list args;
+    va_start(args, format);
+    printf(COLOR_DEBUG);
+    vprintf(format, args);
+    printf(COLOR_RESET);
+    va_end(args);
+}
 
 // === History ===
 
@@ -79,6 +93,7 @@ int get_damage(int k) {
 
 // === Operations ===
 
+// operation 1
 void connect(int c1, int c2) {
     c1 = id[c1];
     c2 = id[c2];
@@ -143,29 +158,33 @@ void connect(int c1, int c2) {
     }
 }
 
+// operation 2
 void evolve(int t) { modify(&v_level[t], v_level[t] + 1); }
 
+// operation 3
 void attack(int t) { modify(&v_damage[t], v_damage[t] + v_level[t]); }
 
+// operation 4
 void reinstall(int k, int s) {
+    int rck = find_root(c_parent, id[k]);
+    modify(&c_delete[rck], c_delete[rck] + 1);
+
     modify(&node_count, node_count + 1);
     modify(&id[k], node_count);
 
-    int rck = find_root(c_parent, id[k]);
-    modify(&c_delete[rck], c_delete[rck] + 1);
     int rvk = find_root(v_parent, c_virus[rck]);
-    modify(&v_count[rvk], v_count[rvk] - 1);
     int rvs = find_root(v_parent, s);
-    modify(&v_count[rvs], v_count[rvs] + 1);
+    if (rvk != rck) {
+        modify(&v_count[rvk], v_count[rvk] - 1);
+        modify(&v_count[rvs], v_count[rvs] + 1);
+    }
 
     k = id[k];
-    modify(&c_size[k], 1);
-    modify(&c_parent[k], k);
-    modify(&c_delete[k], 0);
     modify(&c_virus[k], s);
     modify(&c_damage[k], -get_damage_virus(s));
 }
 
+// operation 5
 void fusion(int v1, int v2) {
     int rv1 = find_root(v_parent, v1);
     int rv2 = find_root(v_parent, v2);
@@ -181,12 +200,14 @@ void fusion(int v1, int v2) {
     modify(&v_damage[rv2], v_damage[rv2] - v_damage[rv1]);
 }
 
+// operation 6
 void status(int k) {
     int rck = find_root(c_parent, id[k]);
     int rvk = find_root(v_parent, c_virus[rck]);
     printf("%lld %lld %lld\n", get_damage(k), v_level[rvk], v_count[rvk]);
 }
 
+// operation 7
 void revert() {
     if (top == 0) return;
 
@@ -201,7 +222,7 @@ void revert() {
 
 void init() {
     node_count = n;
-    for (int i = 1; i <= n; i++) {
+    for (int i = 1; i <= n + q; i++) {
         id[i] = i;
         c_size[i] = 1;
         c_parent[i] = i;
@@ -226,7 +247,7 @@ void init() {
     }
 }
 
-void debug(int t, int a, int b) {
+void print_all(int t, int a, int b) {
     if (!debug_mode) return;
 
     bool bug = false;
@@ -314,14 +335,13 @@ void debug(int t, int a, int b) {
     for (int i = 1; i <= n; i++) {
         printf("%3lld ", v_damage[i]);
     }
-    printf("\n");
+    printf("\n\n");
 
-    printf("history      ");
-    printf("size = %lld, ", top + 1);
+    printf("history    size = %lld    ", top + 1);
     History *h = &history[top];
     for (int i = 0; i < h->size; i++) {
         Modify *m = &h->m[i];
-        printf("(%lld, %lld) ", *m->ptr, m->original_value);
+        printf("(%lld -> %lld) ", m->original_value, *(m->ptr));
     }
     printf("\n");
 
@@ -362,7 +382,7 @@ signed main() {
         } else if (t == 7) {
             revert();
         }
-        if (t != 6) debug(t, a, b);
+        if (t != 6) print_all(t, a, b);
         if (t <= 5) top++;
     }
 
