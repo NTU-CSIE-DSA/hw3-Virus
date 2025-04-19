@@ -23,7 +23,7 @@ int v_size[MN], v_parent[MN];
 int c_virus[MN + MQ], c_damage[MN + MQ];
 int v_count[MN], v_level[MN], v_damage[MN];
 
-bool debug_mode = 0;
+bool debug_mode = 1;
 
 // === History ===
 
@@ -95,9 +95,11 @@ void connect(int c1, int c2) {
     if (is_c1) {
         modify(&c_parent[rc2], rc1);
         modify(&c_size[rc1], c_size[rc1] + c_size[rc2]);
+        modify(&c_delete[rc1], c_delete[rc1] + c_delete[rc2]);
     } else {
         modify(&c_parent[rc1], rc2);
         modify(&c_size[rc2], c_size[rc1] + c_size[rc2]);
+        modify(&c_delete[rc2], c_delete[rc1] + c_delete[rc2]);
     }
 
     int rv1 = find_root(v_parent, c_virus[rc1]);
@@ -122,6 +124,8 @@ void connect(int c1, int c2) {
     bool is_v1 = true;
     if (v_level[rv1] < v_level[rv2]) is_v1 = false;
 
+    printf("damage1, damage2: %lld %lld\n", damage1, damage2);
+
     if (is_c1 && is_v1) {
         modify(&c_damage[rc2], c_damage[rc2] + damage2 - damage1 - c_damage[rc1]);
         modify(&v_count[rv1], v_count[rv1] + size2);
@@ -129,15 +133,15 @@ void connect(int c1, int c2) {
         if (debug_mode) printf("c1 v1\n");
     } else if (is_c1 && !is_v1) {
         modify(&c_virus[rc1], rv2);
-        modify(&c_damage[rc1], c_damage[rc1] + damage1 - damage2);
-        modify(&c_damage[rc2], c_damage[rc2] - c_damage[rc1]);
+        modify(&c_damage[rc1], c_damage[rc1] + damage1 - v_damage[rv2]);
+        modify(&c_damage[rc2], c_damage[rc2] - c_damage[rc1] + damage2 - v_damage[rv2]);
         modify(&v_count[rv2], v_count[rv2] + size1);
         modify(&v_count[rv1], v_count[rv1] - size1);
         if (debug_mode) printf("c1 v2\n");
     } else if (!is_c1 && is_v1) {
         modify(&c_virus[rc2], rv1);
-        modify(&c_damage[rc2], c_damage[rc2] + damage2 - damage1);
-        modify(&c_damage[rc1], c_damage[rc1] - c_damage[rc2]);
+        modify(&c_damage[rc2], c_damage[rc2] + damage2 - v_damage[rv1]);
+        modify(&c_damage[rc1], c_damage[rc1] - c_damage[rc2] + damage1 - v_damage[rv1]);
         modify(&v_count[rv1], v_count[rv1] + size2);
         modify(&v_count[rv2], v_count[rv2] - size2);
         if (debug_mode) printf("c2 v1\n");
@@ -157,11 +161,14 @@ void reinstall(int k, int s) {
     modify(&node_count, node_count + 1);
     modify(&id[k], node_count);
 
-    int rck = find_root(c_parent, k);
+    int rck = find_root(c_parent, id[k]);
     modify(&c_delete[rck], c_delete[rck] + 1);
     int rvk = find_root(v_parent, c_virus[rck]);
     modify(&v_count[rvk], v_count[rvk] - 1);
-    modify(&v_count[s], v_count[s] + 1);
+    int rvs = find_root(v_parent, s);
+    modify(&v_count[rvs], v_count[rvs] + 1);
+
+    printf("rck, rvk, rvs = %lld, %lld, %lld\n", rck, rvk, rvs);
 
     k = id[k];
     modify(&c_size[k], 1);
@@ -176,11 +183,12 @@ void fusion(int v1, int v2) {
     int rv2 = find_root(v_parent, v2);
     if (rv1 == rv2) return;
 
-    if (v_count[rv1] < v_count[rv2]) swap(rv1, rv2);
+    if (v_size[rv1] < v_size[rv2]) swap(rv1, rv2);
     modify(&v_parent[rv2], rv1);
     modify(&v_size[rv1], v_size[rv1] + v_size[rv2]);
 
     modify(&v_count[rv1], v_count[rv1] + v_count[rv2]);
+    modify(&v_count[rv2], 0);
     modify(&v_level[rv1], v_level[rv1] + v_level[rv2]);
     modify(&v_damage[rv2], v_damage[rv2] - v_damage[rv1]);
 }
@@ -196,7 +204,7 @@ void revert() {
 
     top--;
     History *h = &history[top];
-    for (int i = 0; i < h->size; i++) {
+    for (int i = h->size - 1; i >= 0; i--) {
         Modify *m = &h->m[i];
         *(m->ptr) = m->original_value;
     }
@@ -233,6 +241,8 @@ void init() {
 void debug(int t, int a, int b) {
     if (!debug_mode) return;
 
+    bool bug = false;
+
     printf("\n=== DEBUG ===\n\n");
 
     printf(">>> after operation %lld ", t);
@@ -245,77 +255,94 @@ void debug(int t, int a, int b) {
 
     printf("id           ");
     for (int i = 1; i <= n; i++) {
-        printf("%lld ", id[i]);
+        printf("%3lld ", id[i]);
     }
     printf("\n");
 
     printf("real dmg     ");
     for (int i = 1; i <= n; i++) {
-        printf("%lld ", get_damage(i));
+        int damage = get_damage(i);
+        printf("%3lld ", damage);
+        if (damage < 0) bug = true;
     }
     printf("\n\n");
 
     printf("c_size       ");
-    for (int i = 1; i <= n + 10; i++) {
-        printf("%lld ", c_size[i]);
+    for (int i = 1; i <= n + 20; i++) {
+        printf("%3lld ", c_size[i]);
     }
     printf("\n");
 
     printf("c_parent     ");
-    for (int i = 1; i <= n + 10; i++) {
-        printf("%lld ", c_parent[i]);
+    for (int i = 1; i <= n + 20; i++) {
+        printf("%3lld ", c_parent[i]);
     }
     printf("\n");
 
     printf("c_delete     ");
-    for (int i = 1; i <= n + 10; i++) {
-        printf("%lld ", c_delete[i]);
+    for (int i = 1; i <= n + 20; i++) {
+        printf("%3lld ", c_delete[i]);
+    }
+    printf("\n\n");
+
+    printf("c_virus      ");
+    for (int i = 1; i <= n + 20; i++) {
+        printf("%3lld ", c_virus[i]);
+    }
+    printf("\n");
+
+    printf("c_damage     ");
+    for (int i = 1; i <= n + 20; i++) {
+        printf("%3lld ", c_damage[i]);
     }
     printf("\n\n");
 
     printf("v_size       ");
     for (int i = 1; i <= n; i++) {
-        printf("%lld ", v_size[i]);
+        printf("%3lld ", v_size[i]);
     }
     printf("\n");
 
     printf("v_parent     ");
     for (int i = 1; i <= n; i++) {
-        printf("%lld ", v_parent[i]);
-    }
-    printf("\n\n");
-
-    printf("c_virus      ");
-    for (int i = 1; i <= n + 10; i++) {
-        printf("%lld ", c_virus[i]);
-    }
-    printf("\n");
-
-    printf("c_damage     ");
-    for (int i = 1; i <= n + 10; i++) {
-        printf("%lld ", c_damage[i]);
+        printf("%3lld ", v_parent[i]);
     }
     printf("\n\n");
 
     printf("v_count      ");
     for (int i = 1; i <= n; i++) {
-        printf("%lld ", v_count[i]);
+        printf("%3lld ", v_count[i]);
+        if (v_count[i] < 0) bug = true;
     }
     printf("\n");
 
     printf("v_level      ");
     for (int i = 1; i <= n; i++) {
-        printf("%lld ", v_level[i]);
+        printf("%3lld ", v_level[i]);
     }
     printf("\n");
 
     printf("v_damage     ");
     for (int i = 1; i <= n; i++) {
-        printf("%lld ", v_damage[i]);
+        printf("%3lld ", v_damage[i]);
+    }
+    printf("\n");
+
+    printf("history      ");
+    printf("size = %lld, ", top + 1);
+    History *h = &history[top];
+    for (int i = 0; i < h->size; i++) {
+        Modify *m = &h->m[i];
+        printf("(%lld, %lld) ", *m->ptr, m->original_value);
     }
     printf("\n");
 
     printf("\n=== DEBUG END ===\n\n");
+
+    if (bug) {
+        printf("\n\nerror\n\n");
+        exit(1);
+    }
 }
 
 signed main() {
@@ -347,8 +374,8 @@ signed main() {
         } else if (t == 7) {
             revert();
         }
-        if (t <= 5) top++;
         if (t != 6) debug(t, a, b);
+        if (t <= 5) top++;
     }
 
     return 0;
