@@ -1,0 +1,87 @@
+/*
+First reinstall many computers to same virus.
+
+Prevent from not using DSU for virus merge.
+*/
+
+#include <bits/stdc++.h>
+
+#include "testlib.h"
+using namespace std;
+
+int main(int argc, char* argv[]) {
+    registerGen(argc, argv, 1);
+
+    int n = atoi(argv[1]);    // number of computers
+    int q = atoi(argv[2]);    // number of queries
+    int reinstall = q / 10;   // number of reinstall queries
+    int reinstall_virus = 3;  // number of different viruses to reinstall
+
+    vector<int> distri = {10, 10, 15, 2, 3, 5, 2};
+    vector<double> accum_prob = {0, 0, 0, 0, 0, 0, 0};
+
+    int sum = accumulate(distri.begin(), distri.end(), 0);
+    for (int i = 0; i < (int)distri.size(); ++i) {
+        accum_prob[i] = accum_prob[i - 1] + static_cast<double>(distri[i]) / sum;
+    }
+
+    cout << n << " " << q << "\n";
+
+    // Generate reinstall queries
+    for (int i = 0; i < reinstall; ++i) {
+        int k = rnd.next(1, n);
+        int s = rnd.next(1, reinstall_virus);
+        cout << "4 " << k << " " << s << "\n";
+    }
+    q -= reinstall;
+
+    // Generate other queries
+    for (int i = 0; i < q; ++i) {
+        double r = rnd.next(0.0, 1.0);
+        int type = 1;
+        while (accum_prob[type] < r) type++;
+
+        switch (type) {
+            case 1: {  // connect x y
+                int x = rnd.next(1, n);
+                int y = rnd.next(1, n);
+                while (y == x) y = rnd.next(1, n);
+                cout << "1 " << x << " " << y << "\n";
+                break;
+            }
+            case 2: {  // evolve t
+                int t = rnd.next(1, n);
+                cout << "2 " << t << "\n";
+                break;
+            }
+            case 3: {  // attack t
+                int t = rnd.next(1, n);
+                cout << "3 " << t << "\n";
+                break;
+            }
+            case 4: {  // reinstall k s
+                int k = rnd.next(1, n);
+                int s = rnd.next(1, n);
+                cout << "4 " << k << " " << s << "\n";
+                break;
+            }
+            case 5: {  // fusion a b
+                int a = rnd.next(1, n);
+                int b = rnd.next(1, n);
+                while (b == a) b = rnd.next(1, n);
+                cout << "5 " << a << " " << b << "\n";
+                break;
+            }
+            case 6: {  // status k
+                int k = rnd.next(1, n);
+                cout << "6 " << k << "\n";
+                break;
+            }
+            case 7: {  // revert
+                cout << "7\n";
+            }
+        }
+    }
+
+    return 0;
+}
