@@ -7,36 +7,91 @@ manual 4.in
 @subtask brute
 @include samples
 manual 3-1.in
-gen     10        100       0   a
-gen     10        100       0   aa
-gen     100       1000      0   a
-gen     100       1000      0   aa
-gen     100       1000      2   a
-gen     100       1000      2   aa
-gen     1000      1000      0   a
-gen     1000      1000      0   aa
-gen     10        100       1   ab
-gen     10        100       1   aa
-gen     100       1000      1   a
-gen     100       1000      1   aa
-gen     100       1000      3   a
-gen     100       1000      3   aa
-gen     1000      1000      1   a
-gen     1000      1000      1   aa
+gen      5         30        0    public
+gen      5         30        3    publicidk
+gen      10        100       0    publicyee
+gen      100       1000      0    public
+gen      100       1000      2    public
+gen      1000      1000      0    public
+gen      10        100       1    public
+gen      100       1000      3    public
+gen      1000      1000      1    public
+gen      5         30        0    al,gk
+gen      5         30        0    noooplzzd
+gen      10        100       0    aawa
+gen      10        100       0    byhu
+gen      100       1000      0    awtf
+gen      100       1000      0    b
+gen      100       1000      2    a
+gen      100       1000      2    b
+gen      1000      1000      0    a
+gen      1000      1000      0    b
+gen      10        100       1    ab
+gen      10        100       1    b
+gen      100       1000      3    a
+gen      100       1000      3    b
+gen      1000      1000      1    a
+gen      1000      1000      1    b
+
+@subtask basic_dsu
+gen      5         30        4    publicyeeddfbf
+gen      50        1000      4    public
+gen      3000      50000     4    public
+gen      10000     100000    4    public
+gen      50000     100000    4    public
+gen      500000    500000    4    public
+gen      50        1000      4    a
+gen      50        1000      4    b
+gen      3000      50000     4    a
+gen      3000      50000     4    b
+gen      10000     100000    4    a
+gen      10000     100000    4    b
+gen      50000     100000    4    a
+gen      50000     100000    4    b
+gen      500000    500000    4    a
+gen      500000    500000    4    b
+edge2    50000     500000    4
+edge3    5000      100000    4    10
+
+@subtask no_fusion
+@include basic_dsu
+gen      5         30        5    publiclasdjf
+gen      50        1000      5    public
+gen      3000      50000     5    public
+gen      10000     100000    5    public
+gen      50000     100000    5    public
+gen      500000    500000    5    public
+gen      50        1000      5    a
+gen      50        1000      5    b
+gen      3000      50000     5    a
+gen      3000      50000     5    b
+gen      10000     100000    5    a
+gen      10000     100000    5    b
+gen      50000     100000    5    a
+gen      50000     100000    5    b
+gen      500000    500000    5    a
+gen      500000    500000    5    b
+edge2    50000     500000    5
+edge3    5000      100000    5    10
 
 @subtask full
-@include brute
-gen       10000     500000   1   a
-gen       10000     500000   1   aa
-gen       10000     500000   1   aaa
-gen       10000     500000   1   aaaa
-gen       10000     500000   3   a
-gen       10000     500000   3   aa
-gen       10000     500000   3   aaa
-gen       10000     500000   3   aaaa
-gen       500000    500000   1   a
-gen       500000    500000   1   aa
-edge1     50000     500000   1   a
-edge2     50000     500000   1   a
-edge3     5000      100000   1   10     a
-edge3     5000      100000   1   500    a
+@include no_fusion
+gen      3000      100000    1    public
+gen      10000     100000    1    public
+gen      3000      100000    3    public
+gen      10000     100000    3    public
+gen      500000    500000    1    public
+gen      3000      100000    1    a
+gen      3000      100000    1    b
+gen      10000     100000    1    a
+gen      10000     100000    1    b
+gen      3000      100000    3    a
+gen      3000      100000    3    b
+gen      10000     100000    3    a
+gen      10000     100000    3    b
+gen      500000    500000    1    a
+gen      500000    500000    1    b
+edge1    50000     500000    1    100000
+edge2    50000     500000    1
+edge3    5000      100000    1    10
+edge3    5000      100000    1    500

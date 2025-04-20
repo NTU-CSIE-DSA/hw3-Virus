@@ -11,9 +11,19 @@
       "score": 10,
       "validators": []
     },
+    "basic_dsu": {
+      "index": 2,
+      "score": 10,
+      "validators": []
+    },
+    "no_fusion": {
+      "index": 3,
+      "score": 20,
+      "validators": []
+    },
     "full": {
-      "index": 1,
-      "score": 90,
+      "index": 4,
+      "score": 60,
       "validators": []
     }
   }

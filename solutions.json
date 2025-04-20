@@ -1,5 +1,7 @@
 {
   "sol.cpp": { "verdict": "model_solution" },
+  "short.cpp": { "verdict": "correct" },
+  "fastio.cpp": { "verdict": "correct" },
   "bf.cpp": {
     "verdict": "time_limit",
     "except": {

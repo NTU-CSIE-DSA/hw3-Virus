@@ -2,6 +2,7 @@
 First reinstall many computers to same virus.
 
 Prevent from not using DSU for virus merge.
+Test for DSU node deletion.
 */
 
 #include <bits/stdc++.h>
@@ -17,8 +18,8 @@ int main(int argc, char* argv[]) {
     int q = atoi(argv[2]);          // number of queries
     int preset_id = atoi(argv[3]);  // preset id
 
-    int reinstall = q / 10;   // number of reinstall queries
-    int reinstall_virus = 3;  // number of different viruses to reinstall
+    int reinstall = atoi(argv[4]);  // number of reinstall queries
+    int reinstall_virus = 3;        // number of different viruses to reinstall
 
     vector<int> distri = preset[preset_id];
     vector<double> accum_prob = {0, 0, 0, 0, 0, 0, 0};
