@@ -6,23 +6,26 @@ Prevent from not using DSU for virus merge.
 
 #include <bits/stdc++.h>
 
+#include "const.h"
 #include "testlib.h"
 using namespace std;
 
 int main(int argc, char* argv[]) {
     registerGen(argc, argv, 1);
 
-    int n = atoi(argv[1]);    // number of computers
-    int q = atoi(argv[2]);    // number of queries
+    int n = atoi(argv[1]);          // number of computers
+    int q = atoi(argv[2]);          // number of queries
+    int preset_id = atoi(argv[3]);  // preset id
+
     int reinstall = q / 10;   // number of reinstall queries
     int reinstall_virus = 3;  // number of different viruses to reinstall
 
-    vector<int> distri = {10, 10, 15, 2, 3, 5, 2};
+    vector<int> distri = preset[preset_id];
     vector<double> accum_prob = {0, 0, 0, 0, 0, 0, 0};
 
     int sum = accumulate(distri.begin(), distri.end(), 0);
     for (int i = 0; i < (int)distri.size(); ++i) {
-        accum_prob[i] = accum_prob[i - 1] + static_cast<double>(distri[i]) / sum;
+        accum_prob[i] = (i == 0 ? 0 : accum_prob[i - 1]) + static_cast<double>(distri[i]) / sum;
     }
 
     cout << n << " " << q << "\n";
@@ -39,7 +42,7 @@ int main(int argc, char* argv[]) {
     for (int i = 0; i < q; ++i) {
         double r = rnd.next(0.0, 1.0);
         int type = 1;
-        while (accum_prob[type] < r) type++;
+        while (accum_prob[type - 1] < r) type++;
 
         switch (type) {
             case 1: {  // connect x y

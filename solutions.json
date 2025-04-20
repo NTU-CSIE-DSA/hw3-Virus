@@ -1,3 +1,10 @@
 {
-    "sol.cpp": { "verdict": "model_solution" }
+  "sol.cpp": { "verdict": "model_solution" },
+  "bf.cpp": {
+    "verdict": "time_limit",
+    "except": {
+      "samples": "correct",
+      "brute": "correct"
+    }
+  }
 }

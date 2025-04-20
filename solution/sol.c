@@ -158,10 +158,16 @@ void connect(int c1, int c2) {
 }
 
 // operation 2
-void evolve(int t) { modify(&v_level[t], v_level[t] + 1); }
+void evolve(int t) {
+    t = find_root(v_parent, t);
+    modify(&v_level[t], v_level[t] + 1);
+}
 
 // operation 3
-void attack(int t) { modify(&v_damage[t], v_damage[t] + v_level[t]); }
+void attack(int t) {
+    t = find_root(v_parent, t);
+    modify(&v_damage[t], v_damage[t] + v_level[t]);
+}
 
 // operation 4
 void reinstall(int k, int s) {

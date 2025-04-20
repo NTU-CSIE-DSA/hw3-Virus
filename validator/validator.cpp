@@ -12,6 +12,8 @@ int main() {
     int q = inf.readInt(1, MQ, "q");
     inf.readEoln();
 
+    bool has_op6 = false;
+
     for (int i = 0; i < q; ++i) {
         int t = inf.readInt(1, 7, "t");
         if (t != 7) inf.readSpace();
@@ -46,6 +48,7 @@ int main() {
             }
             case 6: {  // status k
                 inf.readInt(1, n, "k");
+                has_op6 = true;
                 break;
             }
             case 7: {  // revert
@@ -54,6 +57,8 @@ int main() {
         }
         inf.readEoln();
     }
+
+    ensuref(has_op6, "There must be at least one status operation (type 6)");
 
     inf.readEof();
     return 0;
