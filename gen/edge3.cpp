@@ -1,9 +1,5 @@
 /*
-Randomly select an operation from the operation pool.
-There will rarely be consecutive identical operations.
-
-Parameters:
-n q preset_id
+Test for undo many times.
 */
 
 #include <bits/stdc++.h>
@@ -18,6 +14,7 @@ int main(int argc, char* argv[]) {
     int n = atoi(argv[1]);          // number of computers
     int q = atoi(argv[2]);          // number of queries
     int preset_id = atoi(argv[3]);  // preset id
+    int max_times = atoi(argv[4]);  // max times
 
     vector<int> distri = preset[preset_id];
     vector<double> accum_prob = {0, 0, 0, 0, 0, 0, 0};
@@ -29,12 +26,14 @@ int main(int argc, char* argv[]) {
 
     cout << n << " " << q << "\n";
 
+    int op7_count = 0;
+
     for (int i = 0; i < q; ++i) {
         double r = rnd.next(0.0, 1.0);
         int type = 1;
         while (accum_prob[type - 1] < r) type++;
 
-        if (type == 6 && i < q / 5) {
+        if ((type == 6 || type == 7) && i < q / 5) {
             type = rnd.next(1, 5);
         }
 
@@ -75,7 +74,18 @@ int main(int argc, char* argv[]) {
                 break;
             }
             case 7: {  // revert
-                cout << "7\n";
+                if (op7_count < q / 10) {
+                    int times = rnd.next(5, max_times);
+                    i--;
+                    for (int j = 0; j < times; ++j) {
+                        cout << "7\n";
+                        i++;
+                        op7_count++;
+                        if (i >= q) break;
+                    }
+                } else {
+                    cout << "7\n";
+                }
             }
         }
     }

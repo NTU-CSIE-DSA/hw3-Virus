@@ -34,10 +34,6 @@ int main(int argc, char* argv[]) {
         int type = 1;
         while (accum_prob[type - 1] < r) type++;
 
-        if (type == 6 && i < q / 5) {
-            type = rnd.next(1, 5);
-        }
-
         switch (type) {
             case 1: {  // connect x y
                 int x = rnd.next(1, n);

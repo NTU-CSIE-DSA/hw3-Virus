@@ -1,9 +1,7 @@
 /*
-Randomly select an operation from the operation pool.
-There will rarely be consecutive identical operations.
+Create big networks and attack many times.
 
-Parameters:
-n q preset_id
+Force them to use lazy tags.
 */
 
 #include <bits/stdc++.h>
@@ -19,6 +17,9 @@ int main(int argc, char* argv[]) {
     int q = atoi(argv[2]);          // number of queries
     int preset_id = atoi(argv[3]);  // preset id
 
+    int connect = q / 10;
+    int attack_and_evolve = q / 10;
+
     vector<int> distri = preset[preset_id];
     vector<double> accum_prob = {0, 0, 0, 0, 0, 0, 0};
 
@@ -29,11 +30,35 @@ int main(int argc, char* argv[]) {
 
     cout << n << " " << q << "\n";
 
+    // Generate connect queries
+    for (int i = 0; i < connect; ++i) {
+        int x = rnd.next(1, n);
+        int y = rnd.next(1, n);
+        while (y == x) y = rnd.next(1, n);
+        cout << "1 " << x << " " << y << "\n";
+    }
+    q -= connect;
+
+    // Generate attack queries
+    for (int i = 0; i < attack_and_evolve; ++i) {
+        int type = rnd.next(1, 2);
+        if (type == 1) {
+            int t = rnd.next(1, n);
+            cout << "2 " << t << "\n";
+        } else {
+            int t = rnd.next(1, n);
+            cout << "3 " << t << "\n";
+        }
+    }
+    q -= attack_and_evolve;
+
+    // Generate other queries
     for (int i = 0; i < q; ++i) {
         double r = rnd.next(0.0, 1.0);
         int type = 1;
         while (accum_prob[type - 1] < r) type++;
 
+        // Avoid generating status queries in the first 10% of queries
         if (type == 6 && i < q / 5) {
             type = rnd.next(1, 5);
         }

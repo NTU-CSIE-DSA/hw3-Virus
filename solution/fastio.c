@@ -12,6 +12,45 @@
         b = temp;     \
     }
 
+/* fast io */
+#define MAXSIZE (1 << 20)
+char buf[MAXSIZE], *p1 = buf, *p2 = buf;
+char pbuf[MAXSIZE], *pp = pbuf;
+
+static inline char gc() {
+    if (p1 == p2 && (p2 = (p1 = buf) + fread(buf, 1, MAXSIZE, stdin)) == buf) return EOF;
+    return *p1++;
+}
+
+static inline int read_int() {
+    int x = 0;
+    char c = gc(), neg = 0;
+    while ((c > '9' || c < '0') && c != '-' && c != EOF) c = gc();
+    if (c == '-') neg = 1, c = gc();
+    while (c >= '0' && c <= '9') {
+        x = (x << 3) + (x << 1) + (c - '0');
+        c = gc();
+    }
+    return neg ? ~x + 1 : x;
+}
+
+static inline void pc(const char c) {
+    if (pp - pbuf == MAXSIZE) fwrite(pbuf, 1, MAXSIZE, stdout), pp = pbuf;
+    *pp++ = c;
+}
+
+static inline void write_int(int x) {
+    static char ch[16];
+    static int idx = 0;
+    if (x < 0) x = ~x + 1, pc('-');
+    if (x == 0) ch[++idx] = 0;
+    while (x > 0) ch[++idx] = x % 10, x /= 10;
+    while (idx) pc(ch[idx--] + 48);
+}
+
+static inline void clean_up() { fwrite(pbuf, 1, pp - pbuf, stdout); }
+/* --- */
+
 int n, q;
 int id[MN], node_count;
 int c_size[MN + MQ], c_delete[MN + MQ], c_parent[MN + MQ];
@@ -158,7 +197,13 @@ void status(int k) {
     int damage = get_damage(k);
     int rck = find_root(c_parent, id[k]);
     int rvk = find_root(v_parent, c_virus[rck]);
-    printf("%lld %lld %lld\n", damage, v_level[rvk], v_count[rvk]);
+    // printf("%lld %lld %lld\n", damage, v_level[rvk], v_count[rvk]);
+    write_int(damage);
+    pc(' ');
+    write_int(v_level[rvk]);
+    pc(' ');
+    write_int(v_count[rvk]);
+    pc('\n');
 }
 
 void revert() {
@@ -195,32 +240,33 @@ void init() {
 }
 
 signed main() {
-    assert(scanf("%lld %lld", &n, &q) == 2);
+    n = read_int(), q = read_int();
     init();
     for (int i = 1; i <= q; i++) {
         int t, a, b;
-        assert(scanf("%lld", &t) == 1);
+        t = read_int();
         if (t == 1) {
-            assert(scanf("%lld %lld", &a, &b) == 2);
+            a = read_int(), b = read_int();
             connect(a, b);
         } else if (t == 2) {
-            assert(scanf("%lld", &a) == 1);
+            a = read_int();
             evolve(a);
         } else if (t == 3) {
-            assert(scanf("%lld", &a) == 1);
+            a = read_int();
             attack(a);
         } else if (t == 4) {
-            assert(scanf("%lld %lld", &a, &b) == 2);
+            a = read_int(), b = read_int();
             reinstall(a, b);
         } else if (t == 5) {
-            assert(scanf("%lld %lld", &a, &b) == 2);
+            a = read_int(), b = read_int();
             fusion(a, b);
         } else if (t == 6) {
-            assert(scanf("%lld", &a) == 1);
+            a = read_int();
             status(a);
         } else if (t == 7) {
             revert();
         }
         if (t <= 5) top++;
     }
+    clean_up();
 }

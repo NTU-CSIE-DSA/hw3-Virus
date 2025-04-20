@@ -11,22 +11,32 @@ gen     10        100       0   a
 gen     10        100       0   aa
 gen     100       1000      0   a
 gen     100       1000      0   aa
+gen     100       1000      2   a
+gen     100       1000      2   aa
 gen     1000      1000      0   a
 gen     1000      1000      0   aa
-gen     10        100       1   a
+gen     10        100       1   ab
 gen     10        100       1   aa
 gen     100       1000      1   a
 gen     100       1000      1   aa
+gen     100       1000      3   a
+gen     100       1000      3   aa
 gen     1000      1000      1   a
 gen     1000      1000      1   aa
-gen     1000      1000      2   a
-gen     1000      1000      2   aa
 
 @subtask full
 @include brute
-gen     1000000   1000000   1   a
-gen     1000000   1000000   1   aa
-gen     1000000   1000000   1   aaa
-gen     1000000   1000000   1   aaaa
-edge1   1000000   1000000   1   a
-edge1   1000000   1000000   1   aa
+gen       10000     500000   1   a
+gen       10000     500000   1   aa
+gen       10000     500000   1   aaa
+gen       10000     500000   1   aaaa
+gen       10000     500000   3   a
+gen       10000     500000   3   aa
+gen       10000     500000   3   aaa
+gen       10000     500000   3   aaaa
+gen       500000    500000   1   a
+gen       500000    500000   1   aa
+edge1     50000     500000   1   a
+edge2     50000     500000   1   a
+edge3     5000      100000   1   10     a
+edge3     5000      100000   1   500    a
