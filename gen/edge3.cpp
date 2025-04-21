@@ -74,7 +74,7 @@ int main(int argc, char* argv[]) {
                 break;
             }
             case 7: {  // revert
-                if (op7_count < q / 10) {
+                if (op7_count < q / 5) {
                     int times = rnd.next(5, max_times);
                     i--;
                     for (int j = 0; j < times; ++j) {

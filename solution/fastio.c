@@ -197,7 +197,6 @@ void status(int k) {
     int damage = get_damage(k);
     int rck = find_root(c_parent, id[k]);
     int rvk = find_root(v_parent, c_virus[rck]);
-    // printf("%lld %lld %lld\n", damage, v_level[rvk], v_count[rvk]);
     write_int(damage);
     pc(' ');
     write_int(v_level[rvk]);

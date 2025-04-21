@@ -17,8 +17,8 @@ int main(int argc, char* argv[]) {
     int q = atoi(argv[2]);          // number of queries
     int preset_id = atoi(argv[3]);  // preset id
 
-    int connect = q / 10;
-    int attack_and_evolve = q / 10;
+    int connect = n * 2 / 3;
+    int attack_and_evolve = q / 4;
 
     vector<int> distri = preset[preset_id];
     vector<double> accum_prob = {0, 0, 0, 0, 0, 0, 0};
@@ -30,23 +30,23 @@ int main(int argc, char* argv[]) {
 
     cout << n << " " << q << "\n";
 
+    vector<int> nums(n - 1, 0);
+    iota(nums.begin(), nums.end(), 2);
+    shuffle(nums.begin(), nums.end());
+
     // Generate connect queries
     for (int i = 0; i < connect; ++i) {
-        int x = rnd.next(1, n);
-        int y = rnd.next(1, n);
-        while (y == x) y = rnd.next(1, n);
-        cout << "1 " << x << " " << y << "\n";
+        cout << "1 " << 1 << " " << nums[i] << "\n";
     }
     q -= connect;
 
     // Generate attack queries
     for (int i = 0; i < attack_and_evolve; ++i) {
         int type = rnd.next(1, 2);
+        int t = 1;
         if (type == 1) {
-            int t = rnd.next(1, n);
             cout << "2 " << t << "\n";
         } else {
-            int t = rnd.next(1, n);
             cout << "3 " << t << "\n";
         }
     }
@@ -72,12 +72,16 @@ int main(int argc, char* argv[]) {
                 break;
             }
             case 2: {  // evolve t
+                int is_1 = rnd.next(1, 2);
                 int t = rnd.next(1, n);
+                if (is_1 == 1) t = 1;
                 cout << "2 " << t << "\n";
                 break;
             }
             case 3: {  // attack t
+                int is_1 = rnd.next(1, 2);
                 int t = rnd.next(1, n);
+                if (is_1 == 1) t = 1;
                 cout << "3 " << t << "\n";
                 break;
             }

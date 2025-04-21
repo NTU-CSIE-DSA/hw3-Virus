@@ -19,7 +19,7 @@ int main(int argc, char* argv[]) {
     int preset_id = atoi(argv[3]);  // preset id
 
     int reinstall = atoi(argv[4]);  // number of reinstall queries
-    int reinstall_virus = 3;        // number of different viruses to reinstall
+    int reinstall_to_virus = 3;     // number of different viruses to reinstall
 
     vector<int> distri = preset[preset_id];
     vector<double> accum_prob = {0, 0, 0, 0, 0, 0, 0};
@@ -34,7 +34,7 @@ int main(int argc, char* argv[]) {
     // Generate reinstall queries
     for (int i = 0; i < reinstall; ++i) {
         int k = rnd.next(1, n);
-        int s = rnd.next(1, reinstall_virus);
+        int s = rnd.next(1, reinstall_to_virus);
         cout << "4 " << k << " " << s << "\n";
     }
     q -= reinstall;
