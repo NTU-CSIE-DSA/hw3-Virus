@@ -13,6 +13,7 @@ You must support the following operations:
 
    - If $C_x$ and $C_y$ are already in the same network, do nothing (but still count as a valid operation for `revert`).
    - If they are infected by the same virus, just merge the networks without changing the infection.
+   - The weaker virus will still exist in the system and its level will remain unchanged. It may still appear in future operations.
 
 2. **Virus Evolution (`evolve`)**: `2 t`  
    Virus $V_t$ evolves, increasing its level $r_t$ by 1.

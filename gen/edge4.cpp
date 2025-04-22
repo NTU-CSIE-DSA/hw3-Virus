@@ -1,6 +1,7 @@
 /*
 Two networks of size n / 2 merge and undo many times.
 
+Achieve worst case O(n log n) DSU.
 Prevent from not using DSU for virus merge.
 */
 
@@ -75,10 +76,11 @@ int main(int argc, char* argv[]) {
     cout << n << " " << q << "\n";
 
     // create two networks of size n / 2
-    for (int y = 3; y <= n; ++y) {
-        int x = (y % 2 == 1) ? 1 : 2;
-        cout << "1 " << x << " " << y << "\n";
-        q--;
+    for (int i = 1; i < n / 2; i *= 2) {
+        for (int j = 1; j <= n; j += i * 2) {
+            cout << "1 " << j << " " << j + i << "\n";
+            q--;
+        }
     }
 
     while (1) {
