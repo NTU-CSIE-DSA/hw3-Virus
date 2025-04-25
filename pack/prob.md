@@ -76,25 +76,25 @@ You must support the following operations:
 
 ## Subtasks
 
-1. **(10%)**
+### Subtask 1 (10 pts)
 
-   - $1 \leq N, Q \leq 1000$
-   - Includes all operations
+- $1 \leq N, Q \leq 1000$
+- Includes all operations
 
-2. **(10%)**
+### Subtask 2 (10 pts)
 
-   - $1 \leq N, Q \leq 5 \times 10^5$
-   - Only includes operations 1, 2, 3, 6
+- $1 \leq N, Q \leq 5 \times 10^5$
+- Only includes operations 1, 2, 3, 6
 
-3. **(20%)**
+### Subtask 3 (20 pts)
 
-   - $1 \leq N, Q \leq 5 \times 10^5$
-   - Only includes operations 1, 2, 3, 4, 6, 7
+- $1 \leq N, Q \leq 5 \times 10^5$
+- Only includes operations 1, 2, 3, 4, 6, 7
 
-4. **(60%)**
+### Subtask 4 (60 pts)
 
-   - $1 \leq N, Q \leq 5 \times 10^5$
-   - Includes all operations
+- $1 \leq N, Q \leq 5 \times 10^5$
+- Includes all operations
 
 ## Input Format
 
