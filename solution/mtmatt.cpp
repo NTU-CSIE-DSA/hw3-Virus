@@ -8,8 +8,6 @@
 /// 5. Fusion of two viruses.
 /// 6. Print the status of a computer.
 /// 7. Revert the last operation.
-///
-///
 #include <functional>
 #include <iostream>
 #include <stack>
@@ -31,11 +29,16 @@ struct Virus {
   int effected_id;
 };
 
-Virus viruses[1000001];
+int v_level[MAX_NM + 1];
+int v_infected_size[MAX_NM + 1];
+int v_tag_attack[MAX_NM + 1];
+int v_effected_id[MAX_NM + 1];
+int v_vsize[MAX_NM + 1];
+
 #endif
 
 int get_virus_type(ComputerDsu computers, int a) {
-  return viruses[computers.find(a)].effected_id;
+  return v_effected_id[computers.find(a)];
 }
 
 // TODO
@@ -44,12 +47,13 @@ void connect(const Query &query) {
   const int y = query.connect.y;
   History &h = history.top();
   std::cerr << "Connected " << x << " and " << y << std::endl;
-  if (viruses[get_virus_type(computer_dsu, x)].level >
-      viruses[get_virus_type(computer_dsu, y)].level) {
+  if (v_level[v_effected_id[computer_dsu.find(x)]] >
+      v_level[v_effected_id[computer_dsu.find(y)]]) {
     h.add(&computer_dsu.virus_type[y], computer_dsu.virus_type[x]);
-
+    // TODO: virus in x replace virus in y
   } else {
     h.add(&computer_dsu.virus_type[x], computer_dsu.virus_type[y]);
+    // TODO: virus in y replace virus in x
   }
   computer_dsu.merge(x, y, h);
 }
@@ -59,8 +63,7 @@ void evolve(const Query &query) {
   const int t = query.evolve.t;
   History &h = history.top();
   std::cerr << "Evolved virus " << t << std::endl;
-  h.add(&viruses[viruses[t].effected_id].level,
-        viruses[viruses[t].effected_id].level + 1);
+  h.add(&v_level[v_effected_id[t]], v_level[v_effected_id[t]] + 1);
 }
 
 /// Attack the computer with virus t. Simply add the level of the virus t to
@@ -69,9 +72,8 @@ void attack(const Query &query) {
   const int t = query.attack.t;
   History &h = history.top();
   std::cerr << "Attacked virus " << t << std::endl;
-  h.add(&viruses[viruses[t].effected_id].tag_attack,
-        viruses[viruses[t].effected_id].tag_attack +
-            viruses[viruses[t].effected_id].level);
+  h.add(&v_tag_attack[v_effected_id[t]],
+        v_tag_attack[v_effected_id[t]] + v_level[v_effected_id[t]]);
 }
 
 // TODO
@@ -80,6 +82,7 @@ void reinstall(const Query &query) {
   const int s = query.reinstall.s;
   History &h = history.top();
   std::cerr << "Reinstalled with k " << k << " and s " << s << std::endl;
+  ;
 }
 
 // FIXME
@@ -87,7 +90,16 @@ void fusion(const Query &query) {
   const int a = query.fusion.a;
   const int b = query.fusion.b;
   History &h = history.top();
-  ;
+  std::cerr << "Fusion of " << a << " and " << b << std::endl;
+  int a_virus = get_virus_type(computer_dsu, a);
+  int b_virus = get_virus_type(computer_dsu, b);
+  if (v_vsize[a_virus] < v_vsize[b_virus]) {
+    std::swap(a_virus, b_virus);
+  }
+  h.add(&v_vsize[a_virus], v_vsize[a_virus] + v_vsize[b_virus]);
+  h.add(&v_vsize[b_virus], 0);
+  h.add(&v_effected_id[b_virus], a_virus);
+  
 }
 
 /// Print the damage of the computer k. The level of the virus in the
