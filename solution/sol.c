@@ -4,8 +4,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #define int long long
-#define MN 1000005
-#define MQ 1000005
+#define MN 500005
+#define MQ 500005
 #define swap(a, b)    \
     {                 \
         int temp = a; \
