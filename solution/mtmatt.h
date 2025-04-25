@@ -1,5 +1,7 @@
 #pragma once
 
+#define FEATURE_COMPUTER
+
 #include <stack>
 #include <vector>
 
@@ -8,6 +10,8 @@
 /// indicating that the assertion failed. The macro is used to enforce
 /// preconditions and postconditions in the code. It is a debugging tool
 /// that helps catch errors early in the development process.
+/// @param x The condition to check.
+/// @throws std::runtime_error if the condition is false.
 #define ensure(x)                                                              \
   if (!(x)) {                                                                  \
     throw std::runtime_error("Assertion failed: " #x);                         \
@@ -20,9 +24,9 @@
 /// Virus simulation query types.
 /// The enum defines the different types of queries that can be performed
 /// in the virus simulation. Each type of query is represented by a unique
-/// integer value. The values are used to identify the type of query in the
+/// long longeger value. The values are used to identify the type of query in the
 /// Query struct. The enum values are used to improve code readability and
-/// maintainability by providing meaningful names for the query types.
+/// malong longainability by providing meaningful names for the query types.
 enum { CONNECT = 1, EVOLVE, ATTACK, REINSTALL, FUSION, STATUS, REVERT };
 
 /// Query is a struct that represents a query in the virus simulation.
@@ -31,22 +35,22 @@ enum { CONNECT = 1, EVOLVE, ATTACK, REINSTALL, FUSION, STATUS, REVERT };
 /// storing different types of data in the same memory location, which
 /// saves memory and allows for more efficient use of resources.
 struct Query {
-  int type;
+  long long type;
   union {
     struct {
-      int x, y;
+      long long x, y;
     } connect;
     struct {
-      int t;
+      long long t;
     } evolve, attack;
     struct {
-      int k, s;
+      long long k, s;
     } reinstall;
     struct {
-      int a, b;
+      long long a, b;
     } fusion;
     struct {
-      int k;
+      long long k;
     } status;
     struct {
     } revert;
@@ -55,18 +59,19 @@ struct Query {
 
 /// History is a stack that stores the history of changes made to the DSU.
 /// It allows reverting the changes made to the DSU by restoring the original
-/// values of the pointers stored in the history stack. The History class is
+/// values of the polong longers stored in the history stack. The History class is
 /// used to implement the revert functionality of the virus simulation.
 class History {
 public:
   History() = default;
 
   /// Reverts the changes made to the DSU by restoring the original values of
-  /// the pointers stored in the history stack. The revert function is used to
+  /// the polong longers stored in the history stack. The revert function is used to
   /// implement the revert functionality of the virus simulation.
   /// It pops all the nodes from the history stack and restores the original
-  /// values of the pointers stored in the nodes. The function returns a
+  /// values of the polong longers stored in the nodes. The function returns a
   /// reference to the current History object to allow for method chaining.
+  /// @return A reference to the current History object.
   History &revert() {
     while (!history_stack.empty()) {
       HistoryNode node = history_stack.top();
@@ -77,12 +82,15 @@ public:
   }
 
   /// Adds a new node to the history stack. The add function is used to store
-  /// the original value of a pointer and the new value assigned to it. The
-  /// function takes a pointer to an integer and the new value to be assigned
-  /// to the pointer. It creates a new HistoryNode object and pushes it onto
+  /// the original value of a polong longer and the new value assigned to it. The
+  /// function takes a polong longer to an long longeger and the new value to be assigned
+  /// to the polong longer. It creates a new HistoryNode object and pushes it onto
   /// the history stack. The function returns a reference to the current
   /// History object to allow for method chaining.
-  History &add(int *ptr, int assigned_value) {
+  /// @param ptr The polong longer to the long longeger to be modified.
+  /// @param assigned_value The new value to be assigned to the polong longer.
+  /// @return A reference to the current History object.
+  History &add(long long *ptr, long long assigned_value) {
     HistoryNode node;
     node.ptr = ptr;
     node.original_value = *ptr;
@@ -93,21 +101,21 @@ public:
 
 private:
   struct HistoryNode {
-    int *ptr;
-    int original_value;
+    long long *ptr;
+    long long original_value;
   };
   std::stack<HistoryNode, std::vector<HistoryNode>> history_stack;
 };
 
-/// Base class for Disjoint Set Union (DSU).
+/// Base class for Disjolong long Set Union (DSU).
 /// This class implements the union-find algorithm with union by size.
 struct DSU {
-  std::vector<int> parent;
-  std::vector<int> size;
+  std::vector<long long> parent;
+  std::vector<long long> size;
 
   DSU() = default;
-  DSU(int n) : parent(n + 1), size(n + 1, 1) {
-    for (int i = 1; i <= n; ++i) {
+  DSU(long long n) : parent(n + 1), size(n + 1, 1) {
+    for (long long i = 1; i <= n; ++i) {
       parent[i] = i;
     }
   }
@@ -115,13 +123,19 @@ struct DSU {
   /// Returns the root of the set containing a.
   /// Path compression is not used to speed up future queries. Otherwise, the
   /// revert and delete operations will not work.
-  int find(int a) const { return find(parent[a]); }
-  bool same(int a, int b) const { return find(a) == find(b); }
+  /// @param a The element to find the root of.
+  /// @return The root of the set containing a.
+  long long find(long long a) const { return find(parent[a]); }
+  bool same(long long a, long long b) const { return find(a) == find(b); }
 
   /// Merge the sets containing a and b.
   /// Returns 1 if the sets were merged, 0 if they were already in the same set.
   /// Union by size is used to speed up future queries.
-  int merge(int a, int b, History &h) {
+  /// @param a The first element.
+  /// @param b The second element.
+  /// @param h The history stack to store the changes made to the DSU.
+  /// @return 1 if the sets were merged, 0 if they were already in the same set.
+  long long merge(long long a, long long b, History &h) {
     a = find(a);
     b = find(b);
     if (a == b)
@@ -137,23 +151,27 @@ struct DSU {
 
 /// VirusDsu is a derived class from DSU that adds additional functionality
 /// specific to the virus simulation.
+#ifdef FEATURE_VIRUS
 struct VirusDsu : public DSU {
-  std::vector<int> level;
-  std::vector<int> infected_size;
-  std::vector<int> tag_attack;
+  std::vector<long long> level;
+  std::vector<long long> infected_size;
+  std::vector<long long> tag_attack;
 
   VirusDsu() = default;
-  VirusDsu(int n)
+  VirusDsu(long long n)
       : DSU(n), level(n + 1, 0), infected_size(n + 1, 0), tag_attack(n + 1, 0) {
   }
 };
+#endif
 
 /// ComputerDsu is a derived class from DSU that adds additional functionality
 /// specific to the computer simulation.
+#ifdef FEATURE_COMPUTER
 struct ComputerDsu : public DSU {
-  std::vector<int> damage;
-  std::vector<int> virus_type;
+  std::vector<long long> damage;
+  std::vector<long long> virus_type;
 
   ComputerDsu() = default;
-  ComputerDsu(int n) : DSU(n), damage(n + 1, 0), virus_type(n + 1, 0) {}
+  ComputerDsu(long long n) : DSU(n), damage(n + 1, 0), virus_type(n + 1, 0) {}
 };
+#endif
