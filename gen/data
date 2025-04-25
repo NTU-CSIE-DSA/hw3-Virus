@@ -9,11 +9,8 @@ manual 4.in
 @testset 1-public
 @include samples
 manual 2.in
-manual 3-1.in
 gen      5         30        0    public
-gen      5         30        3    publicidk
 gen      10        100       0    publicyee
-gen      100       1000      0    public
 gen      100       1000      2    public
 gen      1000      1000      0    public
 gen      10        100       1    public
@@ -21,12 +18,11 @@ gen      100       1000      3    public
 gen      1000      1000      1    public
 
 @testset 1-private
+manual 3-1.in
 gen      5         30        0    al,gk
 gen      5         30        0    noooplzzd
 gen      10        100       0    aawa
-gen      10        100       0    byhu
 gen      100       1000      0    awtf
-gen      100       1000      0    b
 gen      100       1000      2    a
 gen      100       1000      2    b
 gen      1000      1000      0    a
@@ -37,6 +33,7 @@ gen      100       1000      3    a
 gen      100       1000      3    b
 gen      1000      1000      1    a
 gen      1000      1000      1    b
+gen      1000      1000      1    c
 
 @subtask brute
 @include 1-public
@@ -59,6 +56,7 @@ gen      500000    500000    4    a
 gen      500000    500000    4    b
 edge2    50000     500000    4
 edge3    5000      100000    4    10
+edge3    5000      100000    4    1000
 
 @subtask basic_dsu
 @include 2-public
@@ -70,6 +68,7 @@ gen      3000      50000     5    public
 gen      10000     100000    5    public
 gen      50000     100000    5    public
 gen      500000    500000    5    public
+gen      500000    500000    5    publicaa
 
 @testset 3-private
 gen      50        1000      5    a
@@ -96,6 +95,7 @@ gen      10000     100000    1    public
 gen      3000      100000    3    public
 gen      10000     100000    3    public
 gen      500000    500000    1    public
+gen      500000    500000    1    publicaa
 
 @testset 4-private
 gen      3000      100000    1    a

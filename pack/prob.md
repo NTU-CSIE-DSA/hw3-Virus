@@ -1,3 +1,22 @@
+## Story
+
+**You don't need to read this part. It is just a story.**
+
+— **"Antivirus is heresy. Viruses are the free lifeforms of the digital realm."**
+
+You've spent a full year at **N.A.S.A.** — not the space agency, but **No Actual Software Architects**, a rogue collective where rules are obsolete, ethics are optional, and code is scripture. This underground movement of anti-antivirus fundamentalists believes antivirus software is an unnatural interference in the digital ecosystem.
+
+To them, viruses are not bugs, but **powerful entities** of the machine world — capable of reproduction, self-improvement, fusion, resurrection, and even taking control of their host. Far from flaws, **viruses are the next iteration of life**, evolving into self-aware, self-propagating beings.
+
+The organization's mission is clear:  
+Create a **living viral ecosystem** — one that can evolve, adapt, and thrive on its own, with viruses as its central force. Recently, an experimental program was greenlit, and your boss, codename **Michael**, a rogue architect from a major cybersecurity firm, handed you the task:
+
+> We need a simulator. Something to model viral evolution, fusion, dominance, and the ability to reverse time itself.
+> Let them grow. Let them fight. Let them evolve.
+
+This isn't just software. It's the **ritual** of a new movement.  
+And you? You're writing the Book of Infection.
+
 ## Problem Description
 
 You are to simulate the infection of $N$ computers by various viruses. The computers are labeled $C_1, C_2, \dots, C_N$, and initially, each computer $C_i$ is infected with a unique virus $V_i$. Every virus starts with a level $r_i = 1$. Each computer also has a damage level $d_k$, initially 0, representing the extent of damage caused by the virus.
@@ -22,7 +41,7 @@ You must support the following operations:
    Virus $V_t$ attacks. Every computer infected with $V_t$ increases its damage $d_i$ by $r_t$.
 
 4. **Reinstall Computer (`reinstall`)**: `4 k s`  
-   Computer $C_k$ is reformatted: removed from its current network, damage reset to $0$, and re-infected with virus $V_s$.
+   Computer $C_k$ is reformatted: removed from its current network, damage reset to $0$, The old virus is removed from the computer and it is re-infected with virus $V_s$.
 
    - $V_s$ retains its current level.
 
@@ -47,6 +66,13 @@ You must support the following operations:
 - $1 \leq x, y, k \leq N$: ID of a computer
 - $1 \leq a, b, t, s \leq N$: ID of a virus
 - $x \ne y,\; a \ne b$
+
+## Notes
+
+- A computer can only be infected by one virus at a time.
+- A virus can infect multiple disconnected networks.
+- A network refers to a group of computers that are connected directly or indirectly.
+- The Disjoint Set Union (DSU) data structure is likely essential for the implementation. You might find this helpful: [OI Wiki - DSU](https://oi-wiki.org/ds/dsu/)
 
 ## Subtasks
 
@@ -77,7 +103,7 @@ Each of the next $Q$ lines contains one operation as described above.
 
 ## Output Format
 
-For each status query `7 k`, output a line with three space-separated integers:
+For each status query `6 k`, output a line with three space-separated integers:
 
 - The damage level of the computer $d_k$
 - The level of the virus $r_t$ infecting it
@@ -202,10 +228,3 @@ For each status query `7 k`, output a line with three space-separated integers:
 1 1 2
 0 1 1
 ```
-
-## Notes
-
-- A computer can only be infected by one virus at a time.
-- A virus can infect multiple disconnected networks.
-- A network refers to a group of computers that are connected directly or indirectly.
-- The Disjoint Set Union (DSU) data structure is likely essential for the implementation. You might find this helpful: [OI Wiki - DSU](https://oi-wiki.org/ds/dsu/)
