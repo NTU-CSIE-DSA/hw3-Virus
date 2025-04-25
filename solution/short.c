@@ -25,18 +25,24 @@ typedef struct {
 } Modify;
 
 typedef struct {
+    Modify *data;
     int size;
-    Modify m[10];
-} History;
+    int capacity;
+} ModifyStack;
 
-int top = 0;
-History history[MQ];
+ModifyStack mod_stack;
+int op_count = 0;
+int hist_size[MQ];
 
 void modify(int *ptr, int value) {
-    History *h = &history[top];
-    h->m[h->size].ptr = ptr;
-    h->m[h->size].original_value = *ptr;
-    h->size++;
+    if (mod_stack.size == mod_stack.capacity) {
+        mod_stack.capacity *= 2;
+        mod_stack.data = (Modify *)realloc(mod_stack.data, sizeof(Modify) * mod_stack.capacity);
+    }
+    mod_stack.data[mod_stack.size].ptr = ptr;
+    mod_stack.data[mod_stack.size].original_value = *ptr;
+    mod_stack.size++;
+    hist_size[op_count]++;
     *ptr = value;
 }
 
@@ -162,14 +168,15 @@ void status(int k) {
 }
 
 void revert() {
-    if (top == 0) return;
-    top--;
-    History *h = &history[top];
-    for (int i = h->size - 1; i >= 0; i--) {
-        Modify *m = &h->m[i];
+    if (op_count == 0) return;
+    op_count--;
+    int size = hist_size[op_count];
+    for (int i = 0; i < size; i++) {
+        Modify *m = &mod_stack.data[mod_stack.size - 1 - i];
         *(m->ptr) = m->original_value;
     }
-    h->size = 0;
+    mod_stack.size -= size;
+    hist_size[op_count] = 0;
 }
 
 void init() {
@@ -189,9 +196,9 @@ void init() {
         v_level[i] = 1;
         v_damage[i] = 0;
     }
-    for (int i = 0; i < q; i++) {
-        history[i].size = 0;
-    }
+    mod_stack.capacity = 16;
+    mod_stack.size = 0;
+    mod_stack.data = (Modify *)malloc(sizeof(Modify) * mod_stack.capacity);
 }
 
 signed main() {
@@ -221,6 +228,7 @@ signed main() {
         } else if (t == 7) {
             revert();
         }
-        if (t <= 5) top++;
+        if (t <= 5) op_count++;
     }
+    free(mod_stack.data);
 }

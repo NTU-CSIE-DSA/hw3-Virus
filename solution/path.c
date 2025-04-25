@@ -206,7 +206,7 @@ void init() {
         v_level[i] = 1;
         v_damage[i] = 0;
     }
-    mod_stack.capacity = 4;
+    mod_stack.capacity = 16;
     mod_stack.size = 0;
     mod_stack.data = (Modify *)malloc(sizeof(Modify) * mod_stack.capacity);
 }

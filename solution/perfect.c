@@ -1,0 +1,300 @@
+#include <assert.h>
+#include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#define ll long long
+#define MN 500005
+#define MQ 500005
+#define swap(a, b)    \
+    {                 \
+        int temp = a; \
+        a = b;        \
+        b = temp;     \
+    }
+
+/* fast io */
+#define MAXSIZE (1 << 20)
+char buf[MAXSIZE], *p1 = buf, *p2 = buf;
+char pbuf[MAXSIZE], *pp = pbuf;
+
+static inline char gc() {
+    if (p1 == p2) p1 = buf, p2 = buf + read(STDIN_FILENO, buf, MAXSIZE);
+    if (p1 == p2) return EOF;
+    return *p1++;
+}
+
+static inline int read_int() {
+    int x = 0;
+    char c = gc(), neg = 0;
+    while ((c > '9' || c < '0') && c != '-' && c != EOF) c = gc();
+    if (c == '-') neg = 1, c = gc();
+    while (c >= '0' && c <= '9') {
+        x = (x << 3) + (x << 1) + (c - '0');
+        c = gc();
+    }
+    return neg ? ~x + 1 : x;
+}
+
+static inline void pc(const char c) {
+    if (pp - pbuf == MAXSIZE) assert(write(STDOUT_FILENO, pbuf, MAXSIZE)), pp = pbuf;
+    *pp++ = c;
+}
+
+static inline void write_int(ll x) {
+    static char ch[16];
+    static int idx = 0;
+    if (x < 0) x = ~x + 1, pc('-');
+    if (x == 0) ch[++idx] = 0;
+    while (x > 0) ch[++idx] = x % 10, x /= 10;
+    while (idx) pc(ch[idx--] + 48);
+}
+
+static inline void clean_up() { assert(write(STDOUT_FILENO, pbuf, pp - pbuf)); }
+/* --- */
+
+int n, q;
+int id[MN], node_count;
+int c_size[MN + MQ], c_delete[MN + MQ], c_parent[MN + MQ], c_virus[MN + MQ];
+int v_size[MN], v_parent[MN], v_count[MN], v_level[MN];
+ll c_damage[MN + MQ], v_damage[MN];
+
+typedef struct {
+    void *ptr;
+    ll original_value;
+} Modify;
+
+typedef struct {
+    Modify *data;
+    int size;
+    int capacity;
+} ModifyStack;
+
+ModifyStack mod_stack;
+int op_count = 0;
+int hist_size[MQ];
+
+void modify(void *ptr, ll value, bool is_ll) {
+    if (mod_stack.size == mod_stack.capacity) {
+        mod_stack.capacity *= 2;
+        mod_stack.data = (Modify *)realloc(mod_stack.data, sizeof(Modify) * mod_stack.capacity);
+    }
+    ll v = *(ll *)ptr;
+    if (is_ll) {
+        *(ll *)ptr = value;
+        v = v ^ (1LL << 63);
+    } else {
+        *(int *)ptr = (int)value;
+    }
+    mod_stack.data[mod_stack.size].ptr = ptr;
+    mod_stack.data[mod_stack.size].original_value = v;
+    mod_stack.size++;
+    hist_size[op_count]++;
+}
+
+int find_root(int *p, ll *d, int x) {
+    if (p[x] == x) return x;
+    int r = find_root(p, d, p[x]);
+    if (p[x] != r) {
+        modify(&d[x], d[x] + d[p[x]], true);
+        modify(&p[x], r, false);
+    }
+    return r;
+}
+
+int find_root_no(int *p, int x) {
+    while (p[x] != x) x = p[x];
+    return x;
+}
+
+ll get_damage_virus(int k) {
+    ll damage = 0;
+    while (v_parent[k] != k) {
+        damage += v_damage[k];
+        k = v_parent[k];
+    }
+    return damage + v_damage[k];
+}
+
+ll get_damage(int k) {
+    ll damage = 0;
+    k = id[k];
+    while (c_parent[k] != k) {
+        damage += c_damage[k];
+        k = c_parent[k];
+    }
+    return damage + c_damage[k] + get_damage_virus(c_virus[k]);
+}
+
+void connect(int c1, int c2) {
+    int rc1 = find_root(c_parent, c_damage, id[c1]);
+    int rc2 = find_root(c_parent, c_damage, id[c2]);
+    if (rc1 == rc2) return;
+
+    int size1 = c_size[rc1] - c_delete[rc1];
+    int size2 = c_size[rc2] - c_delete[rc2];
+    ll damage1 = get_damage_virus(c_virus[rc1]);
+    ll damage2 = get_damage_virus(c_virus[rc2]);
+
+    bool is_c1 = (c_size[rc1] >= c_size[rc2]);
+    if (is_c1) {
+        modify(&c_parent[rc2], rc1, false);
+        modify(&c_size[rc1], c_size[rc1] + c_size[rc2], false);
+        modify(&c_delete[rc1], c_delete[rc1] + c_delete[rc2], false);
+        modify(&c_damage[rc2], c_damage[rc2] + damage2 - damage1 - c_damage[rc1], true);
+    } else {
+        modify(&c_parent[rc1], rc2, false);
+        modify(&c_size[rc2], c_size[rc1] + c_size[rc2], false);
+        modify(&c_delete[rc2], c_delete[rc1] + c_delete[rc2], false);
+        modify(&c_damage[rc1], c_damage[rc1] + damage1 - damage2 - c_damage[rc2], true);
+    }
+
+    int rv1 = find_root(v_parent, v_damage, c_virus[rc1]);
+    int rv2 = find_root(v_parent, v_damage, c_virus[rc2]);
+    if (rv1 == rv2) return;
+
+    bool is_v1 = (v_level[rv1] >= v_level[rv2]);
+    if (is_c1 && is_v1) {
+        modify(&v_count[rv1], v_count[rv1] + size2, false);
+        modify(&v_count[rv2], v_count[rv2] - size2, false);
+    } else if (is_c1 && !is_v1) {
+        modify(&c_virus[rc1], rv2, false);
+        modify(&c_damage[rc1], c_damage[rc1] + damage1 - v_damage[rv2], true);
+        modify(&v_count[rv2], v_count[rv2] + size1, false);
+        modify(&v_count[rv1], v_count[rv1] - size1, false);
+    } else if (!is_c1 && is_v1) {
+        modify(&c_virus[rc2], rv1, false);
+        modify(&c_damage[rc2], c_damage[rc2] + damage2 - v_damage[rv1], true);
+        modify(&v_count[rv1], v_count[rv1] + size2, false);
+        modify(&v_count[rv2], v_count[rv2] - size2, false);
+    } else {
+        modify(&v_count[rv2], v_count[rv2] + size1, false);
+        modify(&v_count[rv1], v_count[rv1] - size1, false);
+    }
+}
+
+void evolve(int t) {
+    t = find_root(v_parent, v_damage, t);
+    modify(&v_level[t], v_level[t] + 1, false);
+}
+
+void attack(int t) {
+    t = find_root(v_parent, v_damage, t);
+    modify(&v_damage[t], v_damage[t] + v_level[t], true);
+}
+
+void reinstall(int k, int s) {
+    int rck = find_root(c_parent, c_damage, id[k]);
+    modify(&c_delete[rck], c_delete[rck] + 1, false);
+    modify(&node_count, node_count + 1, false);
+    modify(&id[k], node_count, false);
+
+    int rvk = find_root(v_parent, v_damage, c_virus[rck]);
+    int rvs = find_root(v_parent, v_damage, s);
+    if (rvk != rvs) {
+        modify(&v_count[rvk], v_count[rvk] - 1, false);
+        modify(&v_count[rvs], v_count[rvs] + 1, false);
+    }
+
+    k = id[k];
+    modify(&c_virus[k], s, false);
+    modify(&c_damage[k], -get_damage_virus(s), true);
+}
+
+void fusion(int v1, int v2) {
+    int rv1 = find_root(v_parent, v_damage, v1);
+    int rv2 = find_root(v_parent, v_damage, v2);
+    if (rv1 == rv2) return;
+
+    if (v_size[rv1] < v_size[rv2]) swap(rv1, rv2);
+    modify(&v_parent[rv2], rv1, false);
+    modify(&v_size[rv1], v_size[rv1] + v_size[rv2], false);
+    modify(&v_count[rv1], v_count[rv1] + v_count[rv2], false);
+    modify(&v_count[rv2], 0, false);
+    modify(&v_level[rv1], v_level[rv1] + v_level[rv2], false);
+    modify(&v_damage[rv2], v_damage[rv2] - v_damage[rv1], true);
+}
+
+void status(int k) {
+    int rck = find_root_no(c_parent, id[k]);
+    int rvk = find_root_no(v_parent, c_virus[rck]);
+    write_int(get_damage(k));
+    pc(' ');
+    write_int(v_level[rvk]);
+    pc(' ');
+    write_int(v_count[rvk]);
+    pc('\n');
+}
+
+void revert() {
+    if (op_count == 0) return;
+    op_count--;
+    int size = hist_size[op_count];
+    for (int i = 0; i < size; i++) {
+        Modify *m = &mod_stack.data[mod_stack.size - 1 - i];
+        bool is_ll = (m->original_value & (1LL << 63)) ^ (m->original_value & (1LL << 62));
+        ll value = is_ll ? m->original_value ^ (1LL << 63) : m->original_value;
+        if (is_ll) {
+            *(ll *)m->ptr = value;
+        } else {
+            *(int *)m->ptr = value;
+        }
+    }
+    mod_stack.size -= size;
+    hist_size[op_count] = 0;
+}
+
+void init() {
+    node_count = n;
+    for (int i = 1; i <= n + q; i++) {
+        c_size[i] = 1;
+        c_parent[i] = i;
+        c_delete[i] = 0;
+    }
+    for (int i = 1; i <= n; i++) {
+        v_size[i] = 1;
+        v_parent[i] = i;
+        id[i] = i;
+        c_virus[i] = i;
+        c_damage[i] = 0;
+        v_count[i] = 1;
+        v_level[i] = 1;
+        v_damage[i] = 0;
+    }
+    mod_stack.capacity = 16;
+    mod_stack.size = 0;
+    mod_stack.data = (Modify *)malloc(sizeof(Modify) * mod_stack.capacity);
+}
+
+signed main() {
+    n = read_int(), q = read_int();
+    init();
+    for (int i = 1; i <= q; i++) {
+        int t, a, b;
+        t = read_int();
+        if (t == 1) {
+            a = read_int(), b = read_int();
+            connect(a, b);
+        } else if (t == 2) {
+            a = read_int();
+            evolve(a);
+        } else if (t == 3) {
+            a = read_int();
+            attack(a);
+        } else if (t == 4) {
+            a = read_int(), b = read_int();
+            reinstall(a, b);
+        } else if (t == 5) {
+            a = read_int(), b = read_int();
+            fusion(a, b);
+        } else if (t == 6) {
+            a = read_int();
+            status(a);
+        } else if (t == 7) {
+            revert();
+        }
+        if (t <= 5) op_count++;
+    }
+    clean_up();
+    free(mod_stack.data);
+}
