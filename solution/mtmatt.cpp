@@ -35,6 +35,33 @@ int v_tag_attack[MAX_NM + 1];
 int v_effected_id[MAX_NM + 1];
 int v_vsize[MAX_NM + 1];
 
+struct Node { 
+  Node *next, *prev;
+  int id;
+} v_mem_buf[MAX_NM * 100];
+
+Node *v_group[MAX_NM + 1];
+
+Node* new_node(int id) {
+  static Node *v_mem = v_mem_buf;
+  Node *node = v_mem++;
+  node->next = nullptr;
+  node->prev = nullptr;
+  node->id = id;
+  return node;
+}
+
+void v_add_group(int id, int virus_id) {
+  Node *node = new_node(id);
+  if (v_group[virus_id] == nullptr) {
+    v_group[virus_id] = node;
+  } else {
+    node->next = v_group[virus_id];
+    v_group[virus_id]->prev = node;
+    v_group[virus_id] = node;
+  }
+}
+
 #endif
 
 int get_virus_type(ComputerDsu computers, int a) {
@@ -82,7 +109,15 @@ void reinstall(const Query &query) {
   const int s = query.reinstall.s;
   History &h = history.top();
   std::cerr << "Reinstalled with k " << k << " and s " << s << std::endl;
-  ;
+  int virus_id = get_virus_type(computer_dsu, k);
+  int old_virus_id = computer_dsu.virus_type[k];
+  if (virus_id != old_virus_id) {
+    h.add(&computer_dsu.virus_type[k], virus_id);
+    h.add(&v_effected_id[old_virus_id], virus_id);
+    h.add(&v_effected_id[virus_id], old_virus_id);
+    v_group[old_virus_id]->id = s;
+    v_add_group(s, virus_id);
+  }
 }
 
 // FIXME
@@ -100,6 +135,16 @@ void fusion(const Query &query) {
   h.add(&v_vsize[b_virus], 0);
   h.add(&v_effected_id[b_virus], a_virus);
   
+  Node *node = v_group[b_virus];
+  while (node != nullptr) {
+    Node *next = node->next;
+    h.add((long long*)&node->next, (long long)v_group[a_virus]);
+    if (v_group[a_virus] != nullptr)
+      h.add((long long*)&v_group[a_virus]->prev, (long long)node);
+    h.add((long long*)&v_group[a_virus], (long long)node);
+    node = next;
+  }
+  v_group[b_virus] = nullptr;
 }
 
 /// Print the damage of the computer k. The level of the virus in the
@@ -107,7 +152,12 @@ void fusion(const Query &query) {
 void status(const Query &query) {
   const int k = query.status.k;
   History &h = history.top();
-  ;
+  std::cerr << "Status of computer " << k << std::endl;
+  int virus_id = get_virus_type(computer_dsu, k);
+  int damage = v_tag_attack[v_effected_id[virus_id]];
+  int size = v_infected_size[v_effected_id[virus_id]];
+  int level = v_level[v_effected_id[virus_id]];
+  std::cout << damage << " " << size << " " << level << std::endl;
 }
 
 /// Revert the last operation. Simply pop the last operation from the history
