@@ -1,6 +1,6 @@
 {
   "name": "[HW3-P4] Device Symptom Aggregation",
-  "timeLimit": 0.7,
+  "timeLimit": 1,
   "memLimit": 262144,
   "hasSpecialJudge": false,
   "testdata": [
