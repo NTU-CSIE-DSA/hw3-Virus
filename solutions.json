@@ -8,5 +8,18 @@
       "samples": "correct",
       "brute": "correct"
     }
+  },
+  "sub2.cpp": {
+    "verdict": "incorrect",
+    "except": {
+      "basic_dsu": "correct"
+    }
+  },
+  "sub3.cpp": {
+    "verdict": "incorrect",
+    "except": {
+      "basic_dsu": "correct",
+      "no_fusion": "correct"
+    }
   }
 }

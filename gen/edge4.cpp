@@ -12,13 +12,12 @@ Prevent from not using DSU for virus merge.
 using namespace std;
 
 int n, q, preset_id;
-vector<int> distri;
-vector<double> accum_prob;
+
+vector<int> pool;
+int rnd_op() { return pool[rnd.next((int)pool.size())]; }
 
 void random_op() {
-    double r = rnd.next(0.0, 1.0);
-    int type = 1;
-    while (accum_prob[type - 1] < r) type++;
+    int type = rnd_op();
 
     switch (type) {
         case 1: {  // connect x y
@@ -65,12 +64,11 @@ int main(int argc, char* argv[]) {
     q = atoi(argv[2]);          // number of queries
     preset_id = atoi(argv[3]);  // preset id
 
-    distri = preset[preset_id];
-    accum_prob = {0, 0, 0, 0, 0, 0, 0};
-
-    int sum = accumulate(distri.begin(), distri.end(), 0);
-    for (int i = 0; i < (int)distri.size(); ++i) {
-        accum_prob[i] = (i == 0 ? 0 : accum_prob[i - 1]) + static_cast<double>(distri[i]) / sum;
+    vector<int> distri = preset[preset_id];
+    for (int t = 0; t < 7; ++t) {
+        for (int i = 0; i < distri[t]; ++i) {
+            pool.push_back(t + 1);
+        }
     }
 
     cout << n << " " << q << "\n";

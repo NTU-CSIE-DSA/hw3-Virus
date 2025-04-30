@@ -8,6 +8,9 @@ Test for undo many times.
 #include "testlib.h"
 using namespace std;
 
+vector<int> pool;
+int rnd_op() { return pool[rnd.next((int)pool.size())]; }
+
 int main(int argc, char* argv[]) {
     registerGen(argc, argv, 1);
 
@@ -17,11 +20,10 @@ int main(int argc, char* argv[]) {
     int max_times = atoi(argv[4]);  // max times
 
     vector<int> distri = preset[preset_id];
-    vector<double> accum_prob = {0, 0, 0, 0, 0, 0, 0};
-
-    int sum = accumulate(distri.begin(), distri.end(), 0);
-    for (int i = 0; i < (int)distri.size(); ++i) {
-        accum_prob[i] = (i == 0 ? 0 : accum_prob[i - 1]) + static_cast<double>(distri[i]) / sum;
+    for (int t = 0; t < 7; ++t) {
+        for (int i = 0; i < distri[t]; ++i) {
+            pool.push_back(t + 1);
+        }
     }
 
     cout << n << " " << q << "\n";
@@ -29,12 +31,10 @@ int main(int argc, char* argv[]) {
     int op7_count = 0;
 
     for (int i = 0; i < q; ++i) {
-        double r = rnd.next(0.0, 1.0);
-        int type = 1;
-        while (accum_prob[type - 1] < r) type++;
+        int type = rnd_op();
 
         if ((type == 6 || type == 7) && i < q / 5) {
-            type = rnd.next(1, 5);
+            type = rnd_op();
         }
 
         switch (type) {

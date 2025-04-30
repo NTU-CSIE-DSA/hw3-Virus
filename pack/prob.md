@@ -1,6 +1,36 @@
 ## Problem Description
 
-Please refer to [NTU COOL]().
+Please refer to [NTU COOL](https://cool.ntu.edu.tw/courses/47166/assignments/306460).
+
+## Hints
+
+```c
+typedef struct {
+    long long *ptr;
+    long long original_value;
+} Modify;
+
+typedef struct {
+    Modify *data;
+    int size, capacity;
+} ModifyStack;
+
+ModifyStack st;
+int op_count = 0;
+int hist_size[MQ];  // number of modifications for each operation
+
+void modify(long long *ptr, long long value) {
+    if (st.size == st.capacity) {
+        st.capacity *= 2;
+        st.data = (Modify *)realloc(st.data, sizeof(Modify) * st.capacity);
+    }
+    st.data[st.size].ptr = ptr;
+    st.data[st.size].original_value = *ptr;
+    st.size++;
+    hist_size[op_count]++;
+    *ptr = value;
+}
+```
 
 ## Samples
 

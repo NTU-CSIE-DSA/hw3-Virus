@@ -13,22 +13,22 @@ gen      5         30        0    public
 gen      10        100       0    publicyee
 gen      100       1000      2    public
 gen      1000      1000      0    public
-gen      10        100       1    public
+gen      10        100       1    publicldkfj
 gen      100       1000      3    public
 gen      1000      1000      1    public
 
 @testset 1-private
 manual 3-1.in
-gen      5         30        0    al,gk
-gen      5         30        0    noooplzzd
-gen      10        100       0    aawa
-gen      100       1000      0    awtf
+gen      5         30        0    dfaasdklafjdvsnj
+gen      5         30        0    naasdnsfafjklfs
+gen      10        100       0    angjf
+gen      100       1000      0    anvkfk
 gen      100       1000      2    a
 gen      100       1000      2    b
 gen      1000      1000      0    a
 gen      1000      1000      0    b
-gen      10        100       1    ab
-gen      10        100       1    b
+gen      10        100       1    abkjvf
+gen      10        100       1    baadkssdj
 gen      100       1000      3    a
 gen      100       1000      3    b
 gen      1000      1000      1    a

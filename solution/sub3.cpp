@@ -32,7 +32,7 @@ typedef struct {
 
 ModifyStack mod_stack;
 int op_count = 0;
-int hist_size[MQ];  // number of modifications for each operation
+int hist_size[MQ];
 
 void modify(int *ptr, int value) {
     if (mod_stack.size == mod_stack.capacity) {
@@ -46,17 +46,7 @@ void modify(int *ptr, int value) {
     *ptr = value;
 }
 
-int find_root(int *p, int *d, int x) {
-    if (p[x] == x) return x;
-    int r = find_root(p, d, p[x]);
-    if (p[x] != r) {
-        modify(&d[x], d[x] + d[p[x]]);
-        modify(&p[x], r);
-    }
-    return r;
-}
-
-int find_root_no(int *p, int x) {
+int find_root(int *p, int x) {
     while (p[x] != x) x = p[x];
     return x;
 }
@@ -82,8 +72,8 @@ int get_damage(int k) {
 }
 
 void connect(int c1, int c2) {
-    int rc1 = find_root(c_parent, c_damage, id[c1]);
-    int rc2 = find_root(c_parent, c_damage, id[c2]);
+    int rc1 = find_root(c_parent, id[c1]);
+    int rc2 = find_root(c_parent, id[c2]);
     if (rc1 == rc2) return;
 
     int size1 = c_size[rc1] - c_delete[rc1];
@@ -104,8 +94,8 @@ void connect(int c1, int c2) {
         modify(&c_damage[rc1], c_damage[rc1] + damage1 - damage2 - c_damage[rc2]);
     }
 
-    int rv1 = find_root(v_parent, v_damage, c_virus[rc1]);
-    int rv2 = find_root(v_parent, v_damage, c_virus[rc2]);
+    int rv1 = find_root(v_parent, c_virus[rc1]);
+    int rv2 = find_root(v_parent, c_virus[rc2]);
     if (rv1 == rv2) return;
 
     bool is_v1 = (v_level[rv1] >= v_level[rv2]);
@@ -129,23 +119,23 @@ void connect(int c1, int c2) {
 }
 
 void evolve(int t) {
-    t = find_root(v_parent, v_damage, t);
+    t = find_root(v_parent, t);
     modify(&v_level[t], v_level[t] + 1);
 }
 
 void attack(int t) {
-    t = find_root(v_parent, v_damage, t);
+    t = find_root(v_parent, t);
     modify(&v_damage[t], v_damage[t] + v_level[t]);
 }
 
 void reinstall(int k, int s) {
-    int rck = find_root(c_parent, c_damage, id[k]);
+    int rck = find_root(c_parent, id[k]);
     modify(&c_delete[rck], c_delete[rck] + 1);
     modify(&node_count, node_count + 1);
     modify(&id[k], node_count);
 
-    int rvk = find_root(v_parent, v_damage, c_virus[rck]);
-    int rvs = find_root(v_parent, v_damage, s);
+    int rvk = find_root(v_parent, c_virus[rck]);
+    int rvs = find_root(v_parent, s);
     if (rvk != rvs) {
         modify(&v_count[rvk], v_count[rvk] - 1);
         modify(&v_count[rvs], v_count[rvs] + 1);
@@ -157,8 +147,8 @@ void reinstall(int k, int s) {
 }
 
 void fusion(int v1, int v2) {
-    int rv1 = find_root(v_parent, v_damage, v1);
-    int rv2 = find_root(v_parent, v_damage, v2);
+    int rv1 = find_root(v_parent, v1);
+    int rv2 = find_root(v_parent, v2);
     if (rv1 == rv2) return;
 
     if (v_size[rv1] < v_size[rv2]) swap(rv1, rv2);
@@ -171,9 +161,9 @@ void fusion(int v1, int v2) {
 }
 
 void status(int k) {
-    int rck = find_root_no(c_parent, id[k]);
-    int rvk = find_root_no(v_parent, c_virus[rck]);
     int damage = get_damage(k);
+    int rck = find_root(c_parent, id[k]);
+    int rvk = find_root(v_parent, c_virus[rck]);
     printf("%lld %lld %lld\n", damage, v_level[rvk], v_count[rvk]);
 }
 
@@ -231,7 +221,6 @@ signed main() {
             reinstall(a, b);
         } else if (t == 5) {
             assert(scanf("%lld %lld", &a, &b) == 2);
-            fusion(a, b);
         } else if (t == 6) {
             assert(scanf("%lld", &a) == 1);
             status(a);
