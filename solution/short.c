@@ -52,23 +52,22 @@ int find_root(int *p, int x) {
 }
 
 int get_damage_virus(int k) {
-    int damage = 0;
+    int damage = v_damage[k];
     while (v_parent[k] != k) {
-        damage += v_damage[k];
         k = v_parent[k];
+        damage += v_damage[k];
     }
-    damage += v_damage[k];
     return damage;
 }
 
 int get_damage(int k) {
-    int damage = 0;
     k = id[k];
+    int damage = c_damage[k];
     while (c_parent[k] != k) {
-        damage += c_damage[k];
         k = c_parent[k];
+        damage += c_damage[k];
     }
-    return damage + c_damage[k] + get_damage_virus(c_virus[k]);
+    return damage + get_damage_virus(c_virus[k]);
 }
 
 void connect(int c1, int c2) {
@@ -155,7 +154,7 @@ void fusion(int v1, int v2) {
     modify(&v_parent[rv2], rv1);
     modify(&v_size[rv1], v_size[rv1] + v_size[rv2]);
     modify(&v_count[rv1], v_count[rv1] + v_count[rv2]);
-    modify(&v_count[rv2], 0);
+    // modify(&v_count[rv2], 0);
     modify(&v_level[rv1], v_level[rv1] + v_level[rv2]);
     modify(&v_damage[rv2], v_damage[rv2] - v_damage[rv1]);
 }
@@ -229,6 +228,8 @@ signed main() {
             revert();
         }
         if (t <= 5) op_count++;
+        printf("op %lld\n", i);
+        for (int i = 1; i <= n; i++) status(i);
     }
     free(mod_stack.data);
 }
