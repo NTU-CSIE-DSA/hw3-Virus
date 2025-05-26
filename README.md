@@ -65,14 +65,14 @@ Therefore, in the context of this problem, path compression is not strictly nece
 
 This is the most complex operation. First, check if the roots of the two computers are the same; if so, return.
 
-```c=
+```c
 x = find_c(id[x]), y = find_c(id[y]);
 if (x == y) return;
 ```
 
 Ensure `x` is the root with higher rank by swapping. Also record the sizes and damage values before updates, since they may change later. `dmg_x` represents the total damage from the virus root to computer `x`.
 
-```c=
+```c
 bool has_swap = (c_rk[x] < c_rk[y]);
 if (has_swap) swap(x, y);
 int sz_x = c_sz[x], sz_y = c_sz[y];
@@ -81,7 +81,7 @@ int dmg_x = get_v(c_vrs[x]), dmg_y = get_v(c_vrs[y]);
 
 Next, we update the parent, rank, size, and damage tags of the computer nodes in $\text{DSU}_\text{c}$. The line `c_dmg[y] = c_dmg[y] + dmg_y - c_dmg[x] - dmg_x` is written this way because, after the union, the path from `y` will no longer pass through `dmg_y`, but will instead pass through `c_dmg[x]` and `dmg_x`. Therefore, we need to add back what was lost and subtract what was newly added to keep the total damage consistent.
 
-```c=
+```c
 mod(&c_par[y], x);
 mod(&c_rk[x], c_rk[x] + (c_rk[x] == c_rk[y]));
 mod(&c_sz[x], c_sz[x] + c_sz[y]);
@@ -90,7 +90,7 @@ mod(&c_dmg[y], c_dmg[y] + dmg_y - c_dmg[x] - dmg_x);
 
 Then check if the virus roots are the same; if so, return.
 
-```c=
+```c
 int vx = find_v(c_vrs[x]), vy = find_v(c_vrs[y]);
 if (vx == vy) return;
 ```
@@ -100,7 +100,7 @@ Finally, be cautious with the two cases:
 1. If the computer root keeps its virus, update both virus sizes.
 2. If the computer root changes virus, also update the virus id and damage tag. The damage tag again follows a previous logic.
 
-```c=
+```c
 if (v_lv[vx] > v_lv[vy] || (v_lv[vx] == v_lv[vy] && !has_swap)) {
     mod(&v_sz[vx], v_sz[vx] + sz_y);
     mod(&v_sz[vy], v_sz[vy] - sz_y);
@@ -128,7 +128,7 @@ Instead, keep the old node and create a new node in $\text{DSU}\text{c}$, then m
 
 Also update network and virus sizes, and set the new node's damage tag to the negation of its virus’s current tag so that the damage query cancels out.
 
-```c=
+```c
 void reinstall(int k, int s) {
     int rk = find_c(id[k]);
     int vk = find_v(c_vrs[rk]), vs = find_v(s);
@@ -148,7 +148,7 @@ void reinstall(int k, int s) {
 
 Standard union in $\text{DSU}_\text{v}$ with updates to size, level, and damage tag. The damage tag update follows the lazy strategy described above.
 
-```c=
+```c
 void fusion(int a, int b) {
     a = find_v(a), b = find_v(b);
     if (a == b) return;
@@ -177,7 +177,7 @@ The approach for recording modifications has already been explained above, so th
 
 ## Sample Code
 
-```c=
+```c
 #include <assert.h>
 #include <stdbool.h>
 #include <stdio.h>
