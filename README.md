@@ -26,9 +26,9 @@ We'll skip the implementation details here. This results in an overall time comp
 
 To make all operations efficient enough to pass all test cases, we aim for $O(\log N)$ per operation. This can be done using tree-based disjoint sets with optimizations like union by rank and path compression.
 
-We will need two separate disjoint sets: one for computer networks ($\text{DSU}_\text{c}$) and another for virus fusion ($\text{DSU}_\text{v}$). The `connect` operation corresponds to a union in $\text{DSU}_\text{c}$, while the `fusion` operation corresponds to a union in $\text{DSU}_\text{v}$.
+We will need two separate disjoint sets: one for computer networks ($\text{DSU}\_\text{c}$) and another for virus fusion ($\text{DSU}\_\text{v}$). The `connect` operation corresponds to a union in $\text{DSU}\_\text{c}$, while the `fusion` operation corresponds to a union in $\text{DSU}\_\text{v}$.
 
-To determine which fused virus has infected a computer, first find its root in $\text{DSU}_\text{c}$ (`rc`), then get the virus `vc` associated with `rc`. Finally, find the root of `vc` in $\text{DSU}_\text{v}$ (`rvc`), which represents the current virus identity after fusion.
+To determine which fused virus has infected a computer, first find its root in $\text{DSU}\_\text{c}$ (`rc`), then get the virus `vc` associated with `rc`. Finally, find the root of `vc` in $\text{DSU}\_\text{v}$ (`rvc`), which represents the current virus identity after fusion.
 
 Instead of updating all infected computers during an `attack`, we use lazy propagation: record the damage increment on `rvc` as `rvc.dmg_tag`. When querying later, traverse up the virus tree and sum all damage tags to get the total damage. This avoids redundant updates and improves performance.
 
@@ -36,7 +36,7 @@ However, `fusion` requires careful handling. When merging two viruses `v1` and `
 
 To fix this, subtract `rv1.dmg_tag` from `rv2.dmg_tag` during the merge. This neutralizes the contribution from `rv1.dmg_tag` when querying descendants of `rv2`.
 
-The `connect` operation is the most complex. Besides updating damage tags similarly, you also need to determine if the new root in $\text{DSU}_\text{c}$ must adopt a different virus. There are two cases to handle, explained in the Implementation section below.
+The `connect` operation is the most complex. Besides updating damage tags similarly, you also need to determine if the new root in $\text{DSU}\_\text{c}$ must adopt a different virus. There are two cases to handle, explained in the Implementation section below.
 
 ### About Path Compression
 
@@ -98,7 +98,7 @@ if (vx == vy) return;
 Finally, be cautious with the two cases:
 
 1. If the computer root keeps its virus, update both virus sizes.
-2. If the computer root changes virus, also update the virus id and damage tag. The damage tag again follows a previous logic.
+2. If the computer root changes virus, also update the virus id and damage tag. The damage tag again follows the previous logic.
 
 ```c
 if (v_lv[vx] > v_lv[vy] || (v_lv[vx] == v_lv[vy] && !has_swap)) {
